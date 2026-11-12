@@ -1,0 +1,20 @@
+packages:
+  - apps/*
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  esbuild: true
+  prisma: true
+
+minimumReleaseAgeExclude:
+  - '@nestjs/common@11.2.9'
+  - '@nestjs/core@11.2.9'
+  - '@nestjs/platform-express@11.2.9'
+  - '@nestjs/testing@11.2.9'
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - prisma
+  - sharp

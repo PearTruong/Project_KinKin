@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  OWNER
+  EMPLOYEE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RecordStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PurchaseStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderStatus {
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PAID
+  FAILED
+}
+
+enum StockMovementType {
+  RECEIPT
+  SALE
+  ADJUSTMENT
+}
+
+model User {
+  id               String            @id @default(cuid())
+  username         String            @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  role             UserRole          @default(OWNER)
+  status           UserStatus        @default(ACTIVE)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  orders           Order[]
+  purchaseReceipts PurchaseReceipt[]
+  stockMovements   StockMovement[]
+
+  @@index([role, status])
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  code      String       @unique
+  name      String
+  status    RecordStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  products  Product[]
+
+  @@index([status])
+}
+
+model Product {
+  id                     String          @id @default(cuid())
+  sku                    String          @unique
+  categoryId             String
+  category               Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name                   String          @unique
+  salePrice              Int
+  costPrice              Int
+  unit                   String          @default("cái")
+  stock                  Int             @default(0)
+  alertThreshold         Int             @default(5)
+  agedStockThresholdDays Int             @default(30)
+  lastReceivedAt         DateTime?
+  status                 RecordStatus    @default(ACTIVE)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  orderItems             OrderItem[]
+  purchaseItems          PurchaseItem[]
+  stockMovements         StockMovement[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([sku])
+  @@index([lastReceivedAt])
+}
+
+model PurchaseReceipt {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  createdById String
+  createdBy   User           @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  status      PurchaseStatus @default(COMPLETED)
+  totalCost   Int            @default(0)
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  items       PurchaseItem[]
+
+  @@index([createdById])
+  @@index([status, createdAt])
+}
+
+model PurchaseItem {
+  id        String          @id @default(cuid())
+  receiptId String
+  receipt   PurchaseReceipt @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+  productId String
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  unitCost  Int
+  lineTotal Int
+
+  @@index([receiptId])
+  @@index([productId])
+}
+
+model Order {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  createdById String
+  createdBy   User          @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  status      OrderStatus   @default(COMPLETED)
+  subtotal    Int           @default(0)
+  discount    Int           @default(0)
+  total       Int
+  createdAt   DateTime      @default(now())
+  items       OrderItem[]
+  payments    Payment[]
+
+  @@index([createdById])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productName String
+  quantity    Int
+  unitPrice   Int
+  lineTotal   Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  orderId   String
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  method    PaymentMethod @default(CASH)
+  amount    Int
+  status    PaymentStatus @default(PAID)
+  paidAt    DateTime      @default(now())
+
+  @@index([orderId])
+  @@index([status, paidAt])
+}
+
+model StockMovement {
+  id            String            @id @default(cuid())
+  productId     String
+  product       Product           @relation(fields: [productId], references: [id], onDelete: Restrict)
+  type          StockMovementType
+  quantityDelta Int
+  stockBefore   Int
+  stockAfter    Int
+  referenceType String
+  referenceId   String
+  createdById   String
+  createdBy     User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  reason        String?
+  createdAt     DateTime          @default(now())
+
+  @@index([productId, createdAt])
+  @@index([referenceType, referenceId])
+}

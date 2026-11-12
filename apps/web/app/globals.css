@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand Tokens (Figma Final - Cobalt Blue) */
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-light: #eff6ff;
+  --brand-subtle: #dbeafe;
+
+  /* Neutral Slate Palette */
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+
+  /* Semantic Feedback Tokens */
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-light: #fffbeb;
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+  --info: #3b82f6;
+  --info-light: #eff6ff;
+
+  /* Inventory Status Colors */
+  --status-in-stock: #10b981;
+  --status-in-stock-bg: #ecfdf5;
+  --status-low-stock: #f59e0b;
+  --status-low-stock-bg: #fffbeb;
+  --status-out-of-stock: #ef4444;
+  --status-out-of-stock-bg: #fef2f2;
+  --status-aged: #8b5cf6;
+  --status-aged-bg: #f5f3ff;
+
+  /* Backward Compatibility Aliases */
+  --ink: var(--slate-900);
+  --muted: var(--slate-500);
+  --line: var(--slate-200);
+  --paper: #ffffff;
+  --green: var(--brand);
+  --green-dark: var(--brand-hover);
+  --lime: var(--brand-subtle);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: #0f172a;
+  background-color: #f8fafc;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+button, input { font: inherit; }
+
+button { cursor: pointer; }
+
+@media print {
+  body * { visibility: hidden; }
+  #receipt, #receipt * { visibility: visible; }
+  #receipt {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 80mm;
+    box-shadow: none;
+    border: 0;
+  }
+  .no-print { display: none !important; }
+}
